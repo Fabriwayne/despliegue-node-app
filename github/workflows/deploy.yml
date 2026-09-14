@@ -2,7 +2,8 @@ name: CI/CD Node.js a Render
 
 on:
   push:
-    branches: -main
+    branches:
+      - main
 
 jobs:
   test:
@@ -11,30 +12,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
 
-        - name: Descargar codigo
-          uses: actions/checkout@v4
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
 
-        - name: Instalar Node.js
-          uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-          with:
-            node-version: 22
+      - name: Instalar dependencias
+        run: npm install
 
-        - name: Instalar dependencias
-          run: npm install
+      - name: Ejecutar pruebas
+        run: npm test
 
-        - name: Ejecutar pruebas
-          run: npm test
+  deploy:
+    name: Desplegar en Render
 
+    needs: test
 
-deploy:
-  name: Desplegar en Render
+    runs-on: ubuntu-latest
 
-  needs: test
-
-  runs-on: ubuntu-latest
-
-  steps:
-    - name: Ejecutar Deploy Hook de Render
-      run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK}}"
+    steps:
+      - name: Ejecutar Deploy Hook de Render
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK}}"
